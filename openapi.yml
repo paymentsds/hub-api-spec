@@ -1,0 +1,364 @@
+openapi: 3.0.3
+info:
+  version: 1.0.0
+  title: 'blah'
+tags:
+  - name: Payment
+    description: Payment
+
+paths:
+  /accounts:
+    get:
+      description: ''
+      operationId: list-accounts
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MPesaAccount'
+
+    post:
+      requestBody:
+        description: ''
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MPesaAccountRequest'
+      responses:
+        200:
+          description: ''
+
+  /accounts/{accountId}/payments:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+  
+    get:
+      description: ''
+      operationId: list-payments
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: '#/components/schemas/IncomingMPesaPayment'
+                    - $ref: '#/components/schemas/OutgoingMPesaPayment'
+    post:
+      description: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/IncomingMPesaPaymentRequest'
+                - $ref: '#/components/schemas/OutgoingMPesaPaymentRequest'
+      responses:
+        200:
+          description: ''
+    
+  /accounts/{accountId}/payments/{paymentId}:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: get-payment
+      description: ''
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                  oneOf:
+                  - $ref: '#/components/schemas/IncomingMPesaPayment'
+                  - $ref: '#/components/schemas/OutgoingMPesaPayment'
+    patch:
+      description: ''
+      requestBody:
+        description: ''
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+                reference:
+                  type: string
+      responses:
+        200:
+          description: ''
+
+  /accounts/{accountId}/payments/{paymentId}/refund:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: refund-payment
+      description: ''
+      responses:
+        200:
+          description: ''
+    
+  /accounts/{accountId}/payments/{paymentId}/complete:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: complete-payment
+      description: ''
+      responses:
+        200:
+          description: ''
+    
+  /accounts/{accountId}/payments/{paymentId}/cancel:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: cancel-payment-request
+      description: ''
+      responses:
+        200:
+          description: ''
+  /accounts/{accountId}/payments/{paymentId}/status:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      description: ''
+      responses:
+        200:
+          description: ''
+  /accounts/{accountId}/details:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      description: ''
+      responses:
+        200:
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MPesaAccountDetails'
+    patch:
+      description: ''
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MPesaAccountDetails'
+      responses:
+        200:
+          description: ''
+
+components:
+  schemas:
+    MPesaAccountRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [mpesa]
+        name:
+          type: string
+        details:
+          type: object
+          properties:
+            api_key: 
+              type : string
+            public_key:
+              type: string
+            security_credential:
+              type: string
+            initiator_identifier:
+              type: string
+          required:
+            - api_key
+            - public_key
+            - security_credential
+            - initiator_identifier
+      required:
+        - type
+        - name
+        - details
+    MPesaAccount:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [mpesa]
+        name:
+          type: string
+      required:
+        - type
+        - name
+        - details
+    MPesaAccountDetails:
+      type: object
+      properties:
+        api_key: 
+          type : string
+        public_key:
+          type: string
+        security_credential:
+          type: string
+        initiator_identifier:
+          type: string
+      required:
+        - api_key
+        - public_key
+        - security_credential
+        - initiator_identifier
+
+    IncomingMPesaPaymentRequest:
+      type: object
+      properties:
+        method:
+          type: string
+          enum:
+            - mpesa
+        source:
+          type: object
+          properties:
+            number:
+              type: string
+        amount:
+          type: number
+        reference:
+          type: string
+    OutgoingMPesaPaymentRequest:
+      type: object
+      properties:
+        method:
+          type: string
+          enum:
+            - mpesa
+        destination:
+          type: object
+          properties:
+            type: 
+              type: string
+              enum: 
+              - phone
+              - business
+            number:
+              type: string
+        amount:
+          type: number
+        reference:
+          type: string
+    IncomingMPesaPayment:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - complete
+        method:
+          type: string
+          enum:
+            - mpesa
+        source:
+          type: object
+          properties:
+            number:
+              type: string
+        amount:
+          type: number
+        reference:
+          type: string
+    OutgoingMPesaPayment:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum:
+            - pending
+            - complete
+        method:
+          type: string
+          enum:
+            - mpesa
+        destination:
+          type: object
+          properties:
+            type: 
+              type: string
+              enum: 
+              - phone
+              - business
+            number:
+              type: string
+        amount:
+          type: number
+        reference:
+          type: string
+          
+      
+
