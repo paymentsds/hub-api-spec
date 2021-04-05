@@ -182,7 +182,7 @@ paths:
       responses:
         200:
           description: ''
-  /clients:
+  /credentials:
     post:
       description: ''
       responses:
@@ -191,7 +191,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MPesaAccountDetails'
+                $ref: '#/components/schemas/Credentials'
+    get:
+      description: ''
+      responses:
+        200:
+          description: ''
 components:
   schemas:
     MPesaAccountRequest:
@@ -273,6 +278,12 @@ components:
           type: number
         reference:
           type: string
+        autocomplete:
+          type: boolean
+      required:
+        - method
+        - account
+        - amount
     OutgoingMPesaPaymentRequest:
       type: object
       properties:
@@ -297,6 +308,12 @@ components:
           type: number
         reference:
           type: string
+        autocomplete:
+          type: boolean
+      required:
+        - method
+        - account
+        - amount
     IncomingMPesaPayment:
       type: object
       properties:
@@ -356,6 +373,68 @@ components:
           type: number
         reference:
           type: string
-          
-      
+    Credentials:
+      oneOf:
+        - $ref: '#/components/schemas/ApiKeyCredentials'
+        - $ref: '#/components/schemas/Oauth2Credentials'
+        - $ref: '#/components/schemas/ServiceAccountCredentials'
+    Oauth2Credentials:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [oauth2]
+        domain:
+          type: string
+        accounts:
+          type: array
+          items:
+            type: string
+            format: uuid
+        operations:
+          type: array
+          items:
+            type: string
+    ApiKeyCredentials:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [api_key]
+        accounts:
+          type: array
+          items:
+            type: string
+            format: uuid
+        address:
+          type: string
+        operations:
+          type: array
+          items:
+            type: string
+        expire_at:
+          type: string
+    ServiceAccountCredentials:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [api_key]
+        accounts:
+          type: array
+          items:
+            type: string
+            format: uuid
+        operations:
+          type: array
+          items:
+            type: string
+    Role:
+      type: object
+      properties:
+        permissions:
+          type: array
+          items:
+            type: string
+
 
